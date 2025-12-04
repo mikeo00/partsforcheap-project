@@ -60,16 +60,19 @@ export default function RegisterScreen({navigation}){
 
   if (!valid) return;
 
-  setLoading(true);
-  const { data, error } = await supabase.auth.signUp({
-    email: trimmedEmail,
-    password: trimmedPassword,
-    options: { data: { fname: trimmedFname, lname: trimmedLname } }
-  });
-  setLoading(false);
-
-  if (error) Alert.alert("Error", error.message);
-  else Alert.alert("Success", "Account created! Please verify your email.");
+    setLoading(true)
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    })
+    if (error) Alert.alert(error.message);
+    else Alert.alert("Success", "Account created! Please verify your email.");
+    if (!session) Alert.alert('Please check your inbox for email verification!');
+    setLoading(false);
+  
 };
 
     return (
