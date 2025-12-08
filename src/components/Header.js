@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View, Image } from 'react-native'
 import React from 'react'
+import DrawerNav from '../navigation/DrawerNav'
 
 const Header = () => {
   return (
     <View>
-      {/*hamburger menu*/}
+      <DrawerNav/>
                 <Image
                 source={require("../../assets/PARTS_FOR_CHEAP-removebg-preview.png")}
                 style={styles.logo}

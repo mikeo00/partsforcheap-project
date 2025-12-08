@@ -40,8 +40,7 @@ export default function LoginScreen({ navigation }) {
       Alert.alert("Login Failed", error.message);
     } else if (data.user) {
       Alert.alert("Welcome", `Hello ${data.user.email}`);
-      // Navigate to main screen if needed
-      // navigation.replace('Home');
+      navigation.navigate("Homescreen")
     }
   };
 
