@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -32,28 +33,35 @@ const fetchAdminStatus = async (userId) => {
 };
 
 export default function LoginScreen({ navigation }) {
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!phoneNumber || !password) {
+    if (!email || !password) {
       Alert.alert("Error", "Please fill all fields");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
 
     setLoading(true);
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      phone: phoneNumber,
+      email: email.trim(),
       password: password,
     });
 
     setLoading(false);
 
     if (error) {
-      Alert.alert("Login Failed", "Invalid phone or password.");
+      Alert.alert("Login Failed", error.message || "Invalid email or password.");
       return;
     }
 
@@ -62,10 +70,11 @@ export default function LoginScreen({ navigation }) {
 
     if (isAdmin) {
       Alert.alert("Welcome Admin");
-      navigation.navigate("AdminDashboard");
+      // TODO: Add AdminDashboard screen to navigation stack
+      navigation.navigate("Home"); // Temporarily navigate to Home until AdminDashboard is created
     } else {
       Alert.alert("Welcome");
-      navigation.navigate("Homescreen");
+      navigation.navigate("Home"); // Fixed: Changed from "Homescreen" to "Home"
     }
   };
 
@@ -88,16 +97,17 @@ export default function LoginScreen({ navigation }) {
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <Text style={styles.subtitle}>Welcome back! Sign in with your phone number</Text>
+              <Text style={styles.subtitle}>Welcome back! Sign in with your email</Text>
             </View>
 
             <View style={styles.form}>
               <InputField
-                icon="call-outline"
-                placeholder="Phone Number"
-                keyboardType="phone-pad"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
+                icon="mail-outline"
+                placeholder="Email Address"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
               />
 
               <InputField
@@ -122,13 +132,13 @@ export default function LoginScreen({ navigation }) {
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialButton}>
-                  <Ionicons name="logo-google" size={24} color="#fff" />
-                  <Text style={styles.socialButtonText}>Continue with Google</Text>
+                <Ionicons name="logo-google" size={24} color="#fff" />
+                <Text style={styles.socialButtonText}>Continue with Google</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialButton}>
-                  <Ionicons name="logo-facebook" size={24} color="#fff" />
-                  <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+                <Ionicons name="logo-facebook" size={24} color="#fff" />
+                <Text style={styles.socialButtonText}>Continue with Facebook</Text>
               </TouchableOpacity>
 
               <TouchableOpacity disabled={loading} onPress={handleLogin} style={styles.loginBtn}>
@@ -163,5 +173,16 @@ const styles = StyleSheet.create({
   loginText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
   signup: { flexDirection: "row", justifyContent: "center" },
   signupLink: { color: "#FF6B35", fontWeight: "bold" },
+  socialButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    height: 45,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
   socialButtonText: { color: "#fff", fontSize: 16, fontWeight: "600", marginLeft: 12 },
 });

@@ -13,6 +13,6 @@ const Stack = createNativeStackNavigator();
 export default function App() {
  
   return (
-    <AppNavigation/>
+    <AppNavigator/>
   );
 }

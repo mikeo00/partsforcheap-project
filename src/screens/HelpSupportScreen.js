@@ -10,10 +10,20 @@ import {
     Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext';
+
+// Theme colors (static until ThemeContext is implemented)
+const theme = {
+    colors: {
+        background: '#fff',
+        surface: '#f5f5f5',
+        text: '#000',
+        textSecondary: '#666',
+        primary: '#FF6B35',
+        border: '#ddd',
+    }
+};
 
 export default function HelpSupportScreen({ navigation }) {
-    const { theme } = useTheme();
     const [expandedFAQ, setExpandedFAQ] = useState(null);
     const [message, setMessage] = useState('');
 

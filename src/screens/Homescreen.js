@@ -4,20 +4,18 @@ import Header from '../components/Header'
 import SearchBar from '../components/SearchBar'
 import AutoCarousel from '../components/AutoCarousel'
 import BrandGrid from '../components/GridOfBrands'
-import BottomTabNavigator from '../navigation/BottomBarNav'
 
-const homescreen = () => {
+const HomeScreen = () => {
   return (
-    <View>
+    <View style={styles.container}>
       <Header/>
       <SearchBar/>
       <AutoCarousel/>
       <BrandGrid/>
-      <BottomTabNavigator/>
     </View>
   )
 }
 
-export default homescreen
+export default HomeScreen
 
 const styles = StyleSheet.create({})

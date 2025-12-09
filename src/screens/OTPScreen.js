@@ -19,26 +19,26 @@ import InputField from "../components/InputField";
 import { supabase } from "../lib/supabase";
 
 export default function OTPScreen({ route, navigation }) {
-  const { phone, email, fname, lname } = route.params || {};
+  const { email, fname, lname } = route.params || {};
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
 
   useEffect(() => {
-    if (!phone) navigation.goBack();
-  }, [phone]);
+    if (!email) navigation.goBack();
+  }, [email]);
 
   const handleVerify = async () => {
     if (!/^[0-9]{4,6}$/.test(code.trim())) {
-      Alert.alert("Invalid code", "Enter the code you received by SMS.");
+      Alert.alert("Invalid code", "Enter the 6-digit code you received via email.");
       return;
     }
 
     setLoading(true);
     const { data, error } = await supabase.auth.verifyOtp({
-      phone,
+      email,
       token: code.trim(),
-      type: "sms",
+      type: "email",
     });
     setLoading(false);
 
@@ -48,18 +48,23 @@ export default function OTPScreen({ route, navigation }) {
       return;
     }
 
-    // Successful verify: go to create password screen
-    navigation.replace("CreatePassword", { phone, email, fname, lname });
+    // Successful verification - user is now logged in
+    Alert.alert("Success", "Your account has been verified!");
+    navigation.replace("Home");
   };
 
   const handleResend = async () => {
     setResendLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ phone });
+    // Resend email OTP
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+    });
     setResendLoading(false);
     if (error) {
       Alert.alert("Resend failed", error.message || "Could not resend OTP");
     } else {
-      Alert.alert("OTP Sent", "We resent the code to your phone.");
+      Alert.alert("OTP Sent", "We resent the code to your email.");
     }
   };
 
@@ -74,7 +79,7 @@ export default function OTPScreen({ route, navigation }) {
                 <Ionicons name="arrow-back" size={24} color="#fff" />
               </TouchableOpacity>
               <Text style={styles.title}>Enter the OTP</Text>
-              <Text style={styles.subtitle}>We sent a code to {phone}</Text>
+              <Text style={styles.subtitle}>We sent a verification code to {email}</Text>
             </View>
 
             <View style={styles.form}>

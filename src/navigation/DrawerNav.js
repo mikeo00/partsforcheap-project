@@ -1,8 +1,19 @@
-import { StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import React from 'react';
 import AboutUsScreen from '../screens/AboutUsScreen';
 import ContactUsScreen from '../screens/ContactUsScreen';
+import BottomTabNavigator from './BottomBarNav';
+import HelpSupportScreen from '../screens/HelpSupportScreen';
+
+const Drawer = createDrawerNavigator();
+
+// Placeholder for Settings Screen - can be replaced with actual screen later
+const SettingsScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text>Settings Screen</Text>
+  </View>
+);
 
 const DrawerNav = () => {
   return (

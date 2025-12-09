@@ -21,8 +21,11 @@ import { supabase } from "../lib/supabase";
 export default function RegisterScreen({ navigation }) {
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
-  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
@@ -34,39 +37,50 @@ export default function RegisterScreen({ navigation }) {
       Alert.alert("Invalid Last Name", "Enter a valid last name (letters only).");
       return false;
     }
-    if (!/^\+?[0-9]{8,15}$/.test(phone.trim())) {
-      Alert.alert("Invalid Phone", "Enter a valid phone number with country code.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      Alert.alert("Invalid Email", "Enter a valid email address.");
       return false;
     }
-    if (email.trim().length > 0 && !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email.trim())) {
-      Alert.alert("Invalid Email", "Enter a valid email or leave it empty.");
+    if (password.length < 6) {
+      Alert.alert("Weak Password", "Password must be at least 6 characters long.");
+      return false;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Password Mismatch", "Passwords do not match.");
       return false;
     }
     return true;
   };
 
-  const handleSendOtp = async () => {
+  const handleRegister = async () => {
     if (!validate()) return;
 
     setLoading(true);
-    const phoneTrim = phone.trim();
 
-    // Trigger real SMS OTP via Supabase
-    const { data, error } = await supabase.auth.signInWithOtp({
-      phone: phoneTrim,
+    // Sign up with Supabase - this will send an email confirmation
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password: password,
+      options: {
+        data: {
+          first_name: fname.trim(),
+          last_name: lname.trim(),
+        },
+        emailRedirectTo: undefined, // We'll handle OTP verification in the app
+      },
     });
 
     setLoading(false);
 
     if (error) {
-      console.error("signInWithOtp error", error);
-      Alert.alert("OTP Error", error.message || "Failed to send OTP.");
+      console.error("signUp error", error);
+      Alert.alert("Registration Error", error.message || "Failed to register.");
       return;
     }
 
-    // Navigate to OTP screen with all necessary data
+    // Navigate to OTP screen for email verification
+    Alert.alert("Success", "A verification code has been sent to your email.");
     navigation.navigate("OTP", {
-      phone: phoneTrim,
       email: email.trim(),
       fname: fname.trim(),
       lname: lname.trim(),
@@ -106,7 +120,7 @@ export default function RegisterScreen({ navigation }) {
 
               <Image source={require("../../assets/PARTS_FOR_CHEAP-removebg-preview.png")} style={styles.logo} resizeMode="contain" />
 
-              <Text style={styles.subtitle}>Create your account in CarsForCheap</Text>
+              <Text style={styles.subtitle}>Create your account in PartsForCheap</Text>
             </View>
 
             <View style={styles.form}>
@@ -114,15 +128,47 @@ export default function RegisterScreen({ navigation }) {
               <InputField icon="person-outline" placeholder="Last Name" value={lname} onChangeText={setLname} autoCapitalize="words" />
 
               <InputField
-                icon="call-outline"
-                placeholder="Phone Number (include country code)"
-                keyboardType="phone-pad"
-                value={phone}
-                onChangeText={setPhone}
+                icon="mail-outline"
+                placeholder="Email Address"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
                 autoCapitalize="none"
               />
 
-              <InputField icon="mail-outline" placeholder="Email (optional, notifications)" keyboardType="email-address" value={email} onChangeText={setEmail} autoCapitalize="none" />
+              <InputField
+                icon="lock-closed-outline"
+                placeholder="Password"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                rightIcon={
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons
+                      name={showPassword ? "eye-outline" : "eye-off-outline"}
+                      size={20}
+                      color="#8e9aaf"
+                    />
+                  </TouchableOpacity>
+                }
+              />
+
+              <InputField
+                icon="lock-closed-outline"
+                placeholder="Confirm Password"
+                secureTextEntry={!showConfirmPassword}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                rightIcon={
+                  <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    <Ionicons
+                      name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                      size={20}
+                      color="#8e9aaf"
+                    />
+                  </TouchableOpacity>
+                }
+              />
 
               {/* Social Buttons (kept) */}
               <TouchableOpacity style={styles.socialButton} onPress={handleGoogle}>
@@ -135,9 +181,9 @@ export default function RegisterScreen({ navigation }) {
                 <Text style={styles.socialButtonText}>Continue with Facebook</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity disabled={loading} onPress={handleSendOtp} style={styles.RegBtn}>
+              <TouchableOpacity disabled={loading} onPress={handleRegister} style={styles.RegBtn}>
                 <LinearGradient colors={["#FF6B35", "#F7931E"]} style={styles.signUpGradient}>
-                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.signUpText}>Continue</Text>}
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.signUpText}>Sign Up</Text>}
                 </LinearGradient>
               </TouchableOpacity>
 
