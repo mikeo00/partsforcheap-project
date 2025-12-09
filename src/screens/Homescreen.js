@@ -3,6 +3,8 @@ import React from 'react'
 import Header from '../components/Header'
 import SearchBar from '../components/SearchBar'
 import AutoCarousel from '../components/AutoCarousel'
+import BrandGrid from '../components/GridOfBrands'
+import BottomTabNavigator from '../navigation/BottomBarNav'
 
 const homescreen = () => {
   return (
@@ -10,6 +12,8 @@ const homescreen = () => {
       <Header/>
       <SearchBar/>
       <AutoCarousel/>
+      <BrandGrid/>
+      <BottomTabNavigator/>
     </View>
   )
 }

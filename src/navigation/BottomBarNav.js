@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import AccountScreen from '../screens/AccountScreen';
-import AdBanner from '../components/AdBanner';
 
 const Tab = createBottomTabNavigator();
 
@@ -14,7 +13,6 @@ export default function BottomTabNavigator() {
         <Tab.Navigator
             tabBar={(props) => (
                 <View>
-                    <AdBanner style={{ marginHorizontal: 0, borderRadius: 0 }} />
                     <BottomTabBar {...props} />
                 </View>
             )}

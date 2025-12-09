@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   View,
   Text,
@@ -17,51 +16,70 @@ import { StatusBar } from "expo-status-bar";
 import InputField from "../components/InputField";
 import { supabase } from "../lib/supabase";
 
+const fetchAdminStatus = async (userId) => {
+  try {
+    const { data, error } = await supabase
+      .from("Users")
+      .select("is_admin")
+      .eq("user_id", userId)
+      .single();
+
+    if (error) return false;
+    return data?.is_admin || false;
+  } catch {
+    return false;
+  }
+};
+
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!phoneNumber || !password) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
 
     setLoading(true);
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      phone: phoneNumber,
+      password: password,
     });
+
     setLoading(false);
 
     if (error) {
-      Alert.alert("Login Failed", error.message);
-    } else if (data.user) {
-      Alert.alert("Welcome", `Hello ${data.user.email}`);
-      navigation.navigate("Homescreen")
+      Alert.alert("Login Failed", "Invalid phone or password.");
+      return;
+    }
+
+    const user = data.user;
+    const isAdmin = await fetchAdminStatus(user.id);
+
+    if (isAdmin) {
+      Alert.alert("Welcome Admin");
+      navigation.navigate("AdminDashboard");
+    } else {
+      Alert.alert("Welcome");
+      navigation.navigate("Homescreen");
     }
   };
 
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style="light" />
-      <LinearGradient
-        colors={["#1a1a2e", "#16213e", "#0f3460"]}
-        style={{ flex: 1 }}
-      >
+      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <KeyboardAvoidingView
             style={styles.container}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-            {/* Header / Logo */}
             <View style={styles.header}>
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={styles.backButton}
-              >
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                 <Ionicons name="arrow-back" size={24} color="#fff" />
               </TouchableOpacity>
 
@@ -70,20 +88,16 @@ export default function LoginScreen({ navigation }) {
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <Text style={styles.subtitle}>
-                Welcome back! Sign in to continue
-              </Text>
+              <Text style={styles.subtitle}>Welcome back! Sign in with your phone number</Text>
             </View>
 
-            {/* Form */}
             <View style={styles.form}>
               <InputField
-                icon="mail-outline"
-                placeholder="Email Address"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
+                icon="call-outline"
+                placeholder="Phone Number"
+                keyboardType="phone-pad"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
               />
 
               <InputField
@@ -107,36 +121,22 @@ export default function LoginScreen({ navigation }) {
                 <Text style={{ color: "#FF6B35" }}>Forgot Password?</Text>
               </TouchableOpacity>
 
-              {/* Social login (mock) */}
               <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="logo-google" size={24} color="#fff" />
-                <Text style={styles.socialButtonText}>Continue with Google</Text>
+                  <Ionicons name="logo-google" size={24} color="#fff" />
+                  <Text style={styles.socialButtonText}>Continue with Google</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="logo-facebook" size={24} color="#fff" />
-                <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+                  <Ionicons name="logo-facebook" size={24} color="#fff" />
+                  <Text style={styles.socialButtonText}>Continue with Facebook</Text>
               </TouchableOpacity>
 
-              {/* Login button */}
-              <TouchableOpacity
-                disabled={loading}
-                onPress={handleLogin}
-                style={styles.loginBtn}
-              >
-                <LinearGradient
-                  colors={["#FF6B35", "#F7931E"]}
-                  style={styles.loginGradient}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={styles.loginText}>Sign In</Text>
-                  )}
+              <TouchableOpacity disabled={loading} onPress={handleLogin} style={styles.loginBtn}>
+                <LinearGradient colors={["#FF6B35", "#F7931E"]} style={styles.loginGradient}>
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginText}>Sign In</Text>}
                 </LinearGradient>
               </TouchableOpacity>
 
-              {/* Signup */}
               <View style={styles.signup}>
                 <Text style={{ color: "#8e9aaf" }}>Don't have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate("Register")}>
@@ -163,16 +163,5 @@ const styles = StyleSheet.create({
   loginText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
   signup: { flexDirection: "row", justifyContent: "center" },
   signupLink: { color: "#FF6B35", fontWeight: "bold" },
-  socialButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
-    height: 56,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-  },
   socialButtonText: { color: "#fff", fontSize: 16, fontWeight: "600", marginLeft: 12 },
 });
